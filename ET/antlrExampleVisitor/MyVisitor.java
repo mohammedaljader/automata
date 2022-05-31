@@ -4,10 +4,10 @@ import java.util.*;
 import java.util.stream.LongStream;
 
 
-public class MyVisitor extends Example2BaseVisitor<Variable>
+public class MyVisitor extends Example2BaseVisitor<Value>
 {
-    private final Map<String, Variable> variables = new HashMap<>();
-    private final Map<String, Variable> local_variables = new HashMap<>();
+    private final Map<String, Value> variables = new HashMap<>();
+    private final Map<String, Value> local_variables = new HashMap<>();
     private final Map<String, Example2Parser.Function_definitionContext> functions = new HashMap<>();
 
     private String out = "";
@@ -17,18 +17,18 @@ public class MyVisitor extends Example2BaseVisitor<Variable>
     }
 
     @Override
-    public Variable visitAssignment(Example2Parser.AssignmentContext ctx) {
+    public Value visitAssignment(Example2Parser.AssignmentContext ctx) {
         String id = ctx.VALUE().getText();
-        Variable value = null;
+        Value value = null;
         if (ctx.children.get(1).getText().equals("+=")) {
-            Variable old = local_variables.get(id);
+            Value old = local_variables.get(id);
             if (old == null)
                 old = variables.get(id);
             if (old == null) {
                 new TypeMismatchException("There is no variable with name: " + id).printStackTrace();
             } else {
                 try {
-                    Variable result = new Variable();
+                    Value result = new Value();
                     result.concatVariables(this.visit(ctx.expression()), old);
                     value = result;
                 } catch (TypeMismatchException e) {
@@ -36,16 +36,38 @@ public class MyVisitor extends Example2BaseVisitor<Variable>
                 }
             }
         } else if (ctx.children.get(1).getText().equals("-=")) {
-            Variable old = local_variables.get(id);
+            Value old = local_variables.get(id);
             if (old == null)
                 old = variables.get(id);
             if (old == null) {
                 new TypeMismatchException("There is no variable with name: " + id).printStackTrace();
             } else {
-                value = new Variable(old.getNumber() - this.visit(ctx.expression()).getNumber());
+                value = new Value(old.getNumber() - this.visit(ctx.expression()).getNumber());
             }
         } else if (ctx.children.stream().anyMatch(e -> e.getText().equals("="))) {
             value = this.visit(ctx.expression());
+        }else if (ctx.children.stream().anyMatch(e -> e.getText().equals("++"))) {
+            Value old = local_variables.get(id);
+            if (old == null)
+                old = variables.get(id);
+            if (old == null) {
+                new TypeMismatchException("There is no variable with name: " + id).printStackTrace();
+            } else {
+                Value result = new Value();
+                result.setNumber(old.getNumber() + 1);
+                value = result;
+            }
+        }else if (ctx.children.stream().anyMatch(e -> e.getText().equals("--"))) {
+            Value old = local_variables.get(id);
+            if (old == null)
+                old = variables.get(id);
+            if (old == null) {
+                new TypeMismatchException("There is no variable with name: " + id).printStackTrace();
+            } else {
+                Value result = new Value();
+                result.setNumber(old.getNumber() - 1);
+                value = result;
+            }
         }
         if (local_variables.get(id) != null)
             return local_variables.put(id, value);
@@ -53,7 +75,7 @@ public class MyVisitor extends Example2BaseVisitor<Variable>
     }
 
     @Override
-    public Variable visitPrint(Example2Parser.PrintContext ctx) {
+    public Value visitPrint(Example2Parser.PrintContext ctx) {
         var variable = this.visit(ctx.expression());
 
         out += (!out.equals("") ? "\n" : "") + variable.getValue();
@@ -62,10 +84,10 @@ public class MyVisitor extends Example2BaseVisitor<Variable>
     }
 
     @Override
-    public Variable visitValueExpression(Example2Parser.ValueExpressionContext ctx) {
+    public Value visitValueExpression(Example2Parser.ValueExpressionContext ctx) {
         // Retrieve value of variable from memory.
         String name = ctx.getText();
-        Variable value = local_variables.get(name);
+        Value value = local_variables.get(name);
         if (value == null)
             value = variables.get(name);
 
@@ -77,52 +99,52 @@ public class MyVisitor extends Example2BaseVisitor<Variable>
     }
 
     @Override
-    public Variable visitNumberExpression(Example2Parser.NumberExpressionContext ctx) {
-        return new Variable(Integer.parseInt(ctx.getText()));
+    public Value visitNumberExpression(Example2Parser.NumberExpressionContext ctx) {
+        return new Value(Integer.parseInt(ctx.getText()));
     }
 
     @Override
-    public Variable visitStringExpression(Example2Parser.StringExpressionContext ctx) {
-        return new Variable(ctx.getText().substring(1, ctx.getText().length() - 1));
+    public Value visitStringExpression(Example2Parser.StringExpressionContext ctx) {
+        return new Value(ctx.getText().substring(1, ctx.getText().length() - 1));
     }
 
     @Override
-    public Variable visitBooleanExpression(Example2Parser.BooleanExpressionContext ctx) {
-        return new Variable(ctx.getText().equals("true"));
+    public Value visitBooleanExpression(Example2Parser.BooleanExpressionContext ctx) {
+        return new Value(ctx.getText().equals("true"));
     }
 
     @Override
-    public Variable visitPowerExpression(Example2Parser.PowerExpressionContext ctx) {
+    public Value visitPowerExpression(Example2Parser.PowerExpressionContext ctx) {
         var left = this.visit(ctx.expression(0)).getNumber();
         var right = this.visit(ctx.expression(1)).getNumber();
-        return new Variable((int) Math.pow(left, right));
+        return new Value((int) Math.pow(left, right));
     }
 
     @Override
-    public Variable visitModulusExpression(Example2Parser.ModulusExpressionContext ctx) {
+    public Value visitModulusExpression(Example2Parser.ModulusExpressionContext ctx) {
         var left = this.visit(ctx.expression(0)).getNumber();
         var right = this.visit(ctx.expression(1)).getNumber();
-        return new Variable(left % right);
+        return new Value(left % right);
     }
 
     @Override
-    public Variable visitMultiplicationExpression(Example2Parser.MultiplicationExpressionContext ctx) {
+    public Value visitMultiplicationExpression(Example2Parser.MultiplicationExpressionContext ctx) {
         var left = this.visit(ctx.expression(0)).getNumber();
         var right = this.visit(ctx.expression(1)).getNumber();
 
         // Operation
         if (ctx.getChild(1).getText().equals("*")) {
-            return new Variable(left * right);
+            return new Value(left * right);
         } else {
-            return new Variable(left / right);
+            return new Value(left / right);
         }
     }
 
     @Override
-    public Variable visitAdditionExpression(Example2Parser.AdditionExpressionContext ctx) {
-        Variable left = this.visit(ctx.expression(0));
-        Variable right = this.visit(ctx.expression(1));
-        var result = new Variable();
+    public Value visitAdditionExpression(Example2Parser.AdditionExpressionContext ctx) {
+        Value left = this.visit(ctx.expression(0));
+        Value right = this.visit(ctx.expression(1));
+        var result = new Value();
 
         // Operation
         if (ctx.getChild(1).getText().equals("+")) {
@@ -140,60 +162,60 @@ public class MyVisitor extends Example2BaseVisitor<Variable>
     }
 
     @Override
-    public Variable visitFactorialExpression(Example2Parser.FactorialExpressionContext ctx) {
-        Variable number = this.visit(ctx.expression());
+    public Value visitFactorialExpression(Example2Parser.FactorialExpressionContext ctx) {
+        Value number = this.visit(ctx.expression());
         number.setNumber((int) LongStream.rangeClosed(1, number.getNumber())
                 .reduce(1, (long x, long y) -> x * y));
         return number;
     }
 
     @Override
-    public Variable visitComparisonExpression(Example2Parser.ComparisonExpressionContext ctx) {
+    public Value visitComparisonExpression(Example2Parser.ComparisonExpressionContext ctx) {
         var left = this.visit(ctx.expression(0)).getNumber();
         var right = this.visit(ctx.expression(1)).getNumber();
 
         switch (ctx.getChild(1).getText()) {
             case ">":
-                return new Variable(left > right);
+                return new Value(left > right);
             case "<":
-                return new Variable(left < right);
+                return new Value(left < right);
             case "<=":
-                return new Variable(left <= right);
+                return new Value(left <= right);
             case ">=":
-                return new Variable(left >= right);
+                return new Value(left >= right);
             case "==":
-                return new Variable(left.equals(right));
+                return new Value(left.equals(right));
             case "!=":
-                return new Variable(!left.equals(right));
+                return new Value(!left.equals(right));
             default:
-                return new Variable();
+                return new Value();
         }
     }
 
     @Override
-    public Variable visitAndExpression(Example2Parser.AndExpressionContext ctx) {
-        return new Variable(this.visit(ctx.expression(0)).getBool() && this.visit(ctx.expression(1)).getBool());
+    public Value visitAndExpression(Example2Parser.AndExpressionContext ctx) {
+        return new Value(this.visit(ctx.expression(0)).getBool() && this.visit(ctx.expression(1)).getBool());
     }
 
     @Override
-    public Variable visitOrExpression(Example2Parser.OrExpressionContext ctx) {
-        return new Variable(this.visit(ctx.expression(0)).getBool() || this.visit(ctx.expression(1)).getBool());
+    public Value visitOrExpression(Example2Parser.OrExpressionContext ctx) {
+        return new Value(this.visit(ctx.expression(0)).getBool() || this.visit(ctx.expression(1)).getBool());
     }
 
     @Override
-    public Variable visitParenthesisExpression(Example2Parser.ParenthesisExpressionContext ctx) {
+    public Value visitParenthesisExpression(Example2Parser.ParenthesisExpressionContext ctx) {
         return this.visit(ctx.expression());
     }
 
     @Override
-    public Variable visitIf_statement(Example2Parser.If_statementContext ctx) {
+    public Value visitIf_statement(Example2Parser.If_statementContext ctx) {
         List<Example2Parser.Condition_blockContext> conditions = ctx.condition_block();
 
         var evaluatedBlock = false;
 
         for (Example2Parser.Condition_blockContext condition : conditions) {
 
-            Variable evaluated = this.visit(condition.expression());
+            Value evaluated = this.visit(condition.expression());
 
             if (Boolean.TRUE.equals(evaluated.getBool())) {
                 evaluatedBlock = true;
@@ -208,14 +230,14 @@ public class MyVisitor extends Example2BaseVisitor<Variable>
             this.visit(ctx.code_block());
         }
 
-        return new Variable();
+        return new Value();
     }
 
     @Override
-    public Variable visitWhile_statement(Example2Parser.While_statementContext ctx) {
+    public Value visitWhile_statement(Example2Parser.While_statementContext ctx) {
         Example2Parser.Condition_blockContext condition = ctx.condition_block();
 
-        Variable value = this.visit(condition.expression());
+        Value value = this.visit(condition.expression());
 
         while (Boolean.TRUE.equals(value.getBool())) {
             // Visit code block
@@ -224,23 +246,23 @@ public class MyVisitor extends Example2BaseVisitor<Variable>
             // Evaluate expression
             value = this.visit(condition.expression());
         }
-        return new Variable();
+        return new Value();
     }
 
     @Override
-    public Variable visitFunction_definition(Example2Parser.Function_definitionContext ctx) {
+    public Value visitFunction_definition(Example2Parser.Function_definitionContext ctx) {
         functions.put(ctx.VALUE().getText(), ctx);
-        return new Variable();
+        return new Value();
     }
 
     @Override
-    public Variable visitFunction_call(Example2Parser.Function_callContext ctx) {
+    public Value visitFunction_call(Example2Parser.Function_callContext ctx) {
         // Get the function from memory (functions map).
         var function = functions.get(ctx.VALUE().getText());
         // Get all the statements from the function.
         List<Example2Parser.StatementContext> statements = function.code_block().statement();
 
-        Map<String, Variable> local = new HashMap<>();
+        Map<String, Value> local = new HashMap<>();
 
         // Check if the call is correct in number of arguments / parameters.
         if (function.arguments().getChildCount() != ctx.arguments().getChildCount()) {
@@ -256,7 +278,7 @@ public class MyVisitor extends Example2BaseVisitor<Variable>
 
         local_variables.putAll(local);
 
-        var result = new Variable();
+        var result = new Value();
 
         // Visit all statements in the code block.
         for (Example2Parser.StatementContext statement : statements) {
@@ -274,7 +296,7 @@ public class MyVisitor extends Example2BaseVisitor<Variable>
     }
 
     @Override
-    public Variable visitReturn_statement(Example2Parser.Return_statementContext ctx) {
+    public Value visitReturn_statement(Example2Parser.Return_statementContext ctx) {
         return this.visit(ctx.expression());
     }
 

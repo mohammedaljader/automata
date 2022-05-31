@@ -1,11 +1,11 @@
-public class Variable {
+public class Value {
     private String string;
     private Integer number;
     private Boolean bool;
 
     private TYPE type;
 
-    public Variable() {
+    public Value() {
 
     }
 
@@ -26,17 +26,17 @@ public class Variable {
     }
 
 
-    public Variable(Boolean bool) {
+    public Value(Boolean bool) {
         this.bool = bool;
         this.type = TYPE.BOOL;
     }
 
-    public Variable(Integer number) {
+    public Value(Integer number) {
         this.number = number;
         this.type = TYPE.NUMBER;
     }
 
-    public Variable(String string) {
+    public Value(String string) {
         this.string = string;
         this.type = TYPE.STRING;
     }
@@ -67,7 +67,7 @@ public class Variable {
         this.type = TYPE.STRING;
     }
 
-    public void concatVariables(Variable a, Variable b) throws TypeMismatchException {
+    public void concatVariables(Value a, Value b) throws TypeMismatchException {
         var aType = a.getType();
         var bType = b.getType();
 

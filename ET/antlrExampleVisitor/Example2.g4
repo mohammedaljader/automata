@@ -2,7 +2,7 @@ grammar Example2;
 
 start2
      :   NEWLINE* statement (NEWLINE+ statement)* NEWLINE*
-        ;
+     ;
 
 statement
         :   print
@@ -56,7 +56,7 @@ print
 assignment
         :   'var' VALUE ':' TYPE
         |   'var' VALUE ':' TYPE '=' expression
-        |   VALUE ('='|'+='|'-=') expression
+        |   VALUE ('='|'+='|'-='|'++'| '--') expression?
         ;
 
 expression

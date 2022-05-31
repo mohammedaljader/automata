@@ -17,7 +17,7 @@ public class Main {
 
         ParseTree tree = parser.start2();
 		
-        Example2Visitor<Variable> visitor = new MyVisitor();
+        Example2Visitor<Value> visitor = new MyVisitor();
         visitor.visit(tree);
     }
 }
