@@ -1,6 +1,2 @@
-int s = 9
-def myFunc(int i, int b){
-    print(i + b)
-}
-
-myFunc(5,5)
+bool[] arr = [True, False, True]
+arr[2] = False

@@ -10,6 +10,9 @@ import static java.lang.Boolean.parseBoolean;
 public class MyVisitor extends Example2BaseVisitor<Value> {
 
     private final Map<String, Value> valueMap = new HashMap<>();
+    private final  Map<String, List<Integer>> integerList = new HashMap<>();
+    private final  Map<String, List<String>> stringList = new HashMap<>();
+    private final  Map<String, List<Boolean>> booleanList = new HashMap<>();
     Map<String, Value> secondMemory = new HashMap<>();
     Map<String,Example2Parser.Code_blockContext> functBlockMemory= new HashMap<>();
     Map<String, List<String>> functParameterMemory = new HashMap<>();
@@ -408,6 +411,141 @@ public class MyVisitor extends Example2BaseVisitor<Value> {
     @Override
     public Value visitReturn_statement(Example2Parser.Return_statementContext ctx) {
         return this.visit(ctx.expression());
+    }
+
+    @Override
+    public Value visitDeclareIntArray(Example2Parser.DeclareIntArrayContext ctx) {
+        String id = ctx.ID().getText();
+        List<Integer> integers = new ArrayList<>();
+        var numbers = ctx.INT();
+
+        if(numbers != null){
+            for (var number: numbers) {
+                integers.add(Integer.parseInt(number.getText()));
+                System.err.println("number "+ Integer.parseInt(number.getText())+ " added to the array!");
+            }
+        }
+        assert numbers != null;
+        if(numbers.isEmpty()) {
+            System.err.println("Empty array added");
+        }
+        integerList.put(id, integers);
+
+        return null;
+    }
+
+    @Override
+    public Value visitAssignIntArray(Example2Parser.AssignIntArrayContext ctx) {
+        String id = ctx.updateArray().ID().getText();
+        int index = Integer.parseInt(ctx.updateArray().INT().getText());
+        Value value = this.visit(ctx.mathExpression());
+        List<Integer> integers = integerList.get(id);
+
+        if(index >= integers.size() || index < 0){
+            //index does not exists
+            System.err.println("element of index "+ index+ " doesn't exist!");
+        }else{
+            // index exists
+            integers.set(index, Integer.parseInt(value.asString()));
+            System.err.println("element of index "+ index+ " updated to the array! the new value is " + value);
+        }
+
+        for (var number: integers) {
+            System.err.println("number "+ number+ " added to the array!");
+        }
+        integerList.put(id, integers);
+
+        return null;
+    }
+
+    @Override
+    public Value visitDeclareStringArray(Example2Parser.DeclareStringArrayContext ctx) {
+        String id = ctx.ID().getText();
+        List<String> strings = new ArrayList<>();
+        var StringArray = ctx.STRING();
+
+        if(StringArray != null){
+            for (var str: StringArray) {
+                strings.add(str.getText());
+                System.err.println("String "+ str+ " added to the array!");
+            }
+        }
+        assert StringArray != null;
+        if(StringArray.isEmpty()) {
+            System.err.println("Empty array added");
+        }
+        stringList.put(id, strings);
+
+        return null;
+    }
+
+    @Override
+    public Value visitAssignStringArray(Example2Parser.AssignStringArrayContext ctx) {
+        String id = ctx.updateArray().ID().getText();
+        int index = Integer.parseInt(ctx.updateArray().INT().getText());
+        Value value = this.visit(ctx.STRING());
+        List<String> strings = stringList.get(id);
+
+        if(index >= strings.size() || index < 0){
+            //index does not exists
+            System.err.println("element of index "+ index+ " doesn't exist!");
+        }else{
+            // index exists
+            strings.set(index, value.asString());
+            System.err.println("element of index "+ index+ " updated to the array! the new value is " + value);
+        }
+
+        for (var str: strings) {
+            System.err.println("String "+ str+ " added to the array!");
+        }
+        stringList.put(id, strings);
+
+        return null;
+    }
+
+    @Override
+    public Value visitDeclareBooleanArray(Example2Parser.DeclareBooleanArrayContext ctx) {
+        String id = ctx.ID().getText();
+        List<Boolean> booleans = new ArrayList<>();
+        var aBooleans = ctx.BOOLEAN();
+
+        if(aBooleans != null){
+            for (var boolVal: aBooleans) {
+                booleans.add(Boolean.parseBoolean(boolVal.getText()));
+                System.err.println("Bool "+ Boolean.parseBoolean(boolVal.getText())+ " added to the array!");
+            }
+        }
+        assert aBooleans != null;
+        if(aBooleans.isEmpty()) {
+            System.err.println("Empty array added");
+        }
+        booleanList.put(id, booleans);
+
+        return null;
+    }
+
+    @Override
+    public Value visitAssignBooleanArray(Example2Parser.AssignBooleanArrayContext ctx) {
+        String id = ctx.updateArray().ID().getText();
+        int index = Integer.parseInt(ctx.updateArray().INT().getText());
+        Value value = this.visit(ctx.BOOLEAN());
+        List<Boolean> booleans = booleanList.get(id);
+
+        if(index >= booleans.size() || index < 0){
+            //index does not exists
+            System.err.println("element of index "+ index+ " doesn't exist!");
+        }else{
+            // index exists
+            booleans.set(index, Boolean.parseBoolean(value.asString()));
+            System.err.println("element of index "+ index+ " updated to the array! the new value is " + value);
+        }
+
+        for (var boolVal: booleans) {
+            System.err.println("String "+ boolVal+ " added to the array!");
+        }
+        booleanList.put(id, booleans);
+
+        return null;
     }
 }
 
