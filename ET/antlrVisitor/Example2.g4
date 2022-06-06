@@ -11,6 +11,7 @@ statement:   expression
          |   return_statement
          |   array
          |   for_statement
+         |   variable
          ;
 
 function_definition
@@ -23,6 +24,7 @@ function_call
 
 arguments
         :   (expression (COMMA expression)*)?
+        |   ((IntType| BoolType | StringType) ID (COMMA (IntType| BoolType | StringType) ID)*)?
         ;
 
 return_statement
@@ -86,7 +88,6 @@ expression:
           |   expression (GREATER_OR_EQUAL | SMALLER_OR_EQUAL | GREATHER_THAN | SMALLER_THAN | EQUAL | NOT_EQUAL) expression	# ComparisonExpression
           |   expression AND expression									# AndExpression
           |   expression OR expression									# OrExpression
-          |   variable                                                  # Var
           ;
 
 mathExpression:  mathExpression op=MUL mathExpression #  Mul
@@ -98,6 +99,7 @@ mathExpression:  mathExpression op=MUL mathExpression #  Mul
              |   PARANL mathExpression PARANR  # parens
              |   INT #ValueNumber
              |   ID    #ValueVariable
+             |   function_call  # FunctionCallInt
              ;
 
 

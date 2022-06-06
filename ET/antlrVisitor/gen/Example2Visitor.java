@@ -222,13 +222,6 @@ public interface Example2Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitValueBoolean(Example2Parser.ValueBooleanContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code Var}
-	 * labeled alternative in {@link Example2Parser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVar(Example2Parser.VarContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code FunctionCall}
 	 * labeled alternative in {@link Example2Parser#expression}.
 	 * @param ctx the parse tree
@@ -312,6 +305,13 @@ public interface Example2Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPow(Example2Parser.PowContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FunctionCallInt}
+	 * labeled alternative in {@link Example2Parser#mathExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionCallInt(Example2Parser.FunctionCallIntContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code Fact}
 	 * labeled alternative in {@link Example2Parser#mathExpression}.

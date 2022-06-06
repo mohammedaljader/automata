@@ -1,5 +1,6 @@
+int s = 9
 def myFunc(int i, int b){
-    return i + b
+    print(i + b)
 }
 
 myFunc(5,5)
