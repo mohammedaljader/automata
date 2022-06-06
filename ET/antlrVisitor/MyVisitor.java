@@ -3,6 +3,7 @@ import gen.Example2Parser;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.Boolean.parseBoolean;
@@ -11,10 +12,10 @@ import static java.lang.Boolean.parseBoolean;
 public class MyVisitor extends Example2BaseVisitor<Value> {
 
     private final Map<String, Value> valueMap = new HashMap<>();
+    private final Map<String, Example2Parser.Function_definitionContext> functions = new HashMap<>();
 
     @Override
     public Value visitTerminal(TerminalNode node) {
-//        System.err.println("[" + node.getText() + "]");
         return (new Value(node.getText()));
     }
 
@@ -189,9 +190,18 @@ public class MyVisitor extends Example2BaseVisitor<Value> {
 
     @Override
     public Value visitPrintExpr(Example2Parser.PrintExprContext ctx) {
-        Value value = visit(ctx.mathExpression());
+        Value value = this.visit(ctx.mathExpression());
         System.err.println("printed "+ctx.mathExpression().getText()+" = "+ value);
         return value;
+    }
+
+    @Override
+    public Value visitPrintExprWithString(Example2Parser.PrintExprWithStringContext ctx) {
+        Value value = this.visit(ctx.mathExpression());
+        String text = removeFirstAndLast(ctx.STRING().getText())+ value.asString();
+        Value printedValue = new Value(text);
+        System.err.println(text);
+        return printedValue;
     }
 
     @Override
@@ -313,6 +323,71 @@ public class MyVisitor extends Example2BaseVisitor<Value> {
         }
 
         return new Value(new Object());
+    }
+
+    @Override
+    public Value visitFor_statement(Example2Parser.For_statementContext ctx) {
+        Value intValue = this.visit(ctx.int_variable(0));
+        Value value = this.visit(ctx.expression());
+
+        while (Boolean.TRUE.equals(value.asBoolean())) {
+            // Visit code block
+            this.visit(ctx.code_block());
+            intValue =  this.visit(ctx.int_variable(1));
+
+            // Evaluate expression
+            value = this.visit(ctx.expression());
+        }
+        return value;
+    }
+
+    @Override
+    public Value visitFunction_definition(Example2Parser.Function_definitionContext ctx) {
+        String id = ctx.ID().getText();
+        functions.put(id, ctx);
+        return null;
+    }
+
+    @Override
+    public Value visitFunction_call(Example2Parser.Function_callContext ctx) {
+        // Get the function from memory (functions map).
+        var function = functions.get(ctx.ID().getText());
+        // Get all the statements from the function.
+        List<Example2Parser.StatementContext> statements = function.code_block().statement();
+
+        Map<String, Value> local = new HashMap<>();
+
+        // Check if the call is correct in number of arguments / parameters.
+        if (function.arguments().getChildCount() != ctx.arguments().getChildCount()) {
+            throw new RuntimeException("Number of parameters does not match.");
+        }
+
+        // Go through all arguments and add them to memory.
+        for (var i = 0; i < function.arguments().getChildCount(); i++) {
+            var variable = this.visit(ctx.arguments().getChild(i));
+            // Insert variable at start of list
+            local.put(function.arguments().getChild(i).getText(), variable);
+        }
+
+        valueMap.putAll(local);
+
+        Value result = null;
+
+        // Visit all statements in the code block.
+        for (Example2Parser.StatementContext statement : statements) {
+            var s = this.visit(statement);
+            // If the statement is a return statement, set result to statement result, and break the function
+            if (statement.return_statement() != null) {
+                result = new Value(s);
+                break;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Value visitReturn_statement(Example2Parser.Return_statementContext ctx) {
+        return this.visit(ctx.expression());
     }
 }
 

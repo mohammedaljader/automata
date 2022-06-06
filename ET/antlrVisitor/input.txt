@@ -1,12 +1,5 @@
-int a = 1
-int b = 2
-if (a < 4 and b == 2){
-   print "Hello"
+def myFunc(int i, int b){
+    return i + b
 }
 
-
-int i = 0
-while(i < 6){
-      i = i + 1
-      print i
-}
+myFunc(5,5)

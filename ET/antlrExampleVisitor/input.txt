@@ -1,8 +1,5 @@
-var v: number = 6
-while(v > 0){
-   v--
-   print v
-   if(v == 3){
-      print "HelloAndreea"
-   }
+func number myFunc(i, b){
+    return i + b
 }
+
+print myFunc(5,5)

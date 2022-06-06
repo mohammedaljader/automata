@@ -2,21 +2,55 @@ grammar Example2;
 
 start2		: statement* EOF;
 
-statement:   expression      #otherExpr
-         |   value           #assign
-         |   print_func      #print
-         |   while_statement #while_stat
-         |   if_statement    #if_stat
+statement:   expression
+         |   print_func
+         |   while_statement
+         |   if_statement
+         |   function_definition
+         |   function_call
+         |   return_statement
+         |   array
+         |   for_statement
          ;
 
-print_func:   Print op=(INT| BOOLEAN |ID |STRING)  #printVar
-          |   Print mathExpression                 #printExpr
+function_definition
+        :   DEF ID PARANL arguments PARANR code_block
+        ;
+
+function_call
+        :   ID PARANL arguments PARANR
+        ;
+
+arguments
+        :   (expression (COMMA expression)*)?
+        ;
+
+return_statement
+        :   RETURN expression
+        ;
+
+array:
+      IntType ARRAYPL ARRAYPR ID IS_EQUAL ARRAYPL ( INT ( COMMA INT )* )? ARRAYPR             #declareIntArray
+      | updateArray mathExpression                                                            #assignIntArray
+      | StringType ARRAYPL ARRAYPR ID IS_EQUAL ARRAYPL ( STRING ( COMMA STRING )* )? ARRAYPR  #declareStringArray
+      | updateArray STRING                                                                    #assignStringArray
+      | BoolType ARRAYPL ARRAYPR ID IS_EQUAL ARRAYPL ( BOOLEAN ( COMMA BOOLEAN )* )? ARRAYPR  #declareBooleanArray
+      | updateArray BOOLEAN                                                                   #assignBooleanArray
+      ;
+
+updateArray: ID ARRAYPL INT ARRAYPR IS_EQUAL;
+
+for_statement: FOR PARANL int_variable SEMICOLON expression SEMICOLON int_variable PARANR code_block ;
+
+print_func:   Print PARANL op=(INT| BOOLEAN |ID |STRING) PARANR        #printVar
+          |   Print PARANL mathExpression PARANR                       #printExpr
+          |   Print PARANL STRING COMMA mathExpression PARANR          #printExprWithString
           ;
 
-value : int_variable
-      | bool_variable
-      | string_variable
-      ;
+variable : int_variable
+         | bool_variable
+         | string_variable
+         ;
 
 
 if_statement
@@ -44,12 +78,15 @@ int_variable :  IntType ID (IS_EQUAL mathExpression)?        # intAssign
              |  ID (ADD_INCREMENT| SUB_INCREMENT | INCREMENT | DECREMENT) mathExpression?  # incrementAndDecrementInt
              ;
 
-expression:   mathExpression #MathExp
+expression:
+           function_call  # FunctionCall
+          | mathExpression #MathExp
           |   BOOLEAN        #ValueBoolean
           |   STRING         #ValueString
           |   expression (GREATER_OR_EQUAL | SMALLER_OR_EQUAL | GREATHER_THAN | SMALLER_THAN | EQUAL | NOT_EQUAL) expression	# ComparisonExpression
           |   expression AND expression									# AndExpression
           |   expression OR expression									# OrExpression
+          |   variable                                                  # Var
           ;
 
 mathExpression:  mathExpression op=MUL mathExpression #  Mul
@@ -75,6 +112,8 @@ FACT:   '!';
 PARANL: '(';
 PARANR: ')';
 DOT : '.';
+ARRAYPL:  '[';
+ARRAYPR:  ']';
 
 ADD_INCREMENT : '+=';
 SUB_INCREMENT : '-=';
@@ -102,11 +141,13 @@ StringType: 'string';
 WHILE : 'while';
 COMMA: ',';
 SEMICOLON: ';';
+DEF:  'def';
 
 IF : 'if';
 ELSE : 'else';
 FOR : 'for';
 
+RETURN: 'return';
 Print: 'print';
 
 INT     : SUB?[0-9]+(DOT[0-9]+)? ;
