@@ -62,8 +62,8 @@ class Value {
 
 
 class MyVisitor extends Example2BaseVisitor<Value> {
-    private Map<String, Value> valueStorage = new HashMap<String, Value>();
-    private Map<String, Value> recordStorage = new HashMap<>();
+    private final Map<String, Value> valuesHashMap = new HashMap<>();
+    private final Map<String, Value> recordsHashMap = new HashMap<>();
 
     @Override
     public Value visitTerminal(TerminalNode node) {
@@ -72,53 +72,43 @@ class MyVisitor extends Example2BaseVisitor<Value> {
 
     @Override
     public Value visitIntegerValue(Example2Parser.IntegerValueContext ctx) {
-        Value value = visit(ctx.INT());
-        return value;
+        return this.visit(ctx.INT());
     }
-
-
 
     @Override
-    public Value visitParenthesis(Example2Parser.ParenthesisContext ctx) {
-        return visit(ctx.expression(0));
+    public Value visitParentheses(Example2Parser.ParenthesesContext ctx) {
+        return this.visit(ctx.expression());
     }
 
-
-    private void printSystem(Object input){
-        System.out.println(input);
-    }
-
-    // Variables
     @Override
-    public Value visitAssignVariables(Example2Parser.AssignVariablesContext ctx) {
-
-        if ( ctx.ID().size() == ctx.expression().size()){
+    public Value visitAssign_variables(Example2Parser.Assign_variablesContext ctx) {
+////        Map<String, Value> valuesHashMap2 = new HashMap<>();
+//        HashMap<String, Value> valuesHashMap2 = (HashMap<String, Value>) valuesHashMap;
+        if (ctx.ID().size() == ctx.expression().size()){
             for (int i = 0; i < ctx.ID().size(); i++) {
                 String id =  ctx.ID(i).getText();
-                Value rtnval = visit(ctx.expression(i));
-                if (!valueStorage.containsKey(id)){
-                    valueStorage.put(id,rtnval);
+                Value rtnval = this.visit(ctx.expression(i));
+                if (!valuesHashMap.containsKey(id)){
+                    valuesHashMap.put(id,rtnval);
                 }
-                printSystem( id+ " : " + rtnval.toString());
+                System.err.println(id+ " = " + rtnval.toString());
             }
         }
         else {
-            printSystem("The variables on the left do not match the assignments on the right");
+            System.err.println("Error: the variables of left side do not match the right side");
         }
-        return (Value.VOID);
+        return Value.VOID;
     }
 
     @Override
-    public Value visitVariable(Example2Parser.VariableContext ctx) {
+    public Value visitVariableValue(Example2Parser.VariableValueContext ctx) {
         String id = ctx.ID().getText();
-        return valueStorage.get(id);
+        Value value = valuesHashMap.get(id);
+        return value;
     }
 
-    // Records
-
     @Override
-    public Value visitRecordAssign(Example2Parser.RecordAssignContext ctx) {
-        ;
+    public Value visitRecords(Example2Parser.RecordsContext ctx) {
         List<Value> temp = new ArrayList<>();
         String id = ctx.ID().getText();
         for (int i = 0; i < ctx.recordsTypes().size() ; i++) {
@@ -137,21 +127,19 @@ class MyVisitor extends Example2BaseVisitor<Value> {
                 temp.add(value);
             }
         }
-        recordStorage.put(id,new Value(calculate(temp)));
+        recordsHashMap.put(id,new Value(calculate(temp)));
 
-        System.out.println("The size of " + id + " is " + recordStorage.get(id));
-        return new Value(recordStorage.get(id));
+        System.out.println("The size of " + id + " is " + recordsHashMap.get(id));
+        return new Value(recordsHashMap.get(id));
     }
 
     private int calculate(List<Value> temp){
         int sum = 0;
-        for (int i = 0; i < temp.size() ; i++) {
-            sum += Integer.parseInt(String.valueOf(temp.get(i)));
+        for (Value value : temp) {
+            sum += Integer.parseInt(String.valueOf(value));
         }
         return sum;
     }
-
-
 
     @Override
     public Value visitInteger(Example2Parser.IntegerContext ctx) {
@@ -161,44 +149,42 @@ class MyVisitor extends Example2BaseVisitor<Value> {
 
     @Override
     public Value visitChar(Example2Parser.CharContext ctx) {
-//        recordStorage.put(ctx.ID().getText(), new Value(1));
         System.err.println("The size of " + ctx.ID().getText() + " is " + 1);
         return new Value(1);
     }
 
-    // Mathematical operations
     @Override
-    public Value visitAdding(Example2Parser.AddingContext ctx) {
-        Value first = visit(ctx.expression(0));
-        Value second = visit(ctx.expression(1));
+    public Value visitAdd(Example2Parser.AddContext ctx) {
+        Value first = this.visit(ctx.expression(0));
+        Value second = this.visit(ctx.expression(1));
         return new Value((Integer.parseInt(first.asString())) + (Integer.parseInt(second.asString())));
     }
 
     @Override
-    public Value visitSubstracting(Example2Parser.SubstractingContext ctx) {
-        Value first = visit(ctx.expression(0));
-        Value second = visit(ctx.expression(1));
+    public Value visitSub(Example2Parser.SubContext ctx) {
+        Value first = this.visit(ctx.expression(0));
+        Value second = this.visit(ctx.expression(1));
         return new Value((Integer.parseInt(first.asString()) - (Integer.parseInt(second.asString()))));
     }
 
     @Override
-    public Value visitMultiplication(Example2Parser.MultiplicationContext ctx) {
-        Value first = visit(ctx.expression(0));
-        Value second = visit(ctx.expression(1));
+    public Value visitMul(Example2Parser.MulContext ctx) {
+        Value first = this.visit(ctx.expression(0));
+        Value second = this.visit(ctx.expression(1));
         return new Value((Integer.parseInt(first.asString()) * (Integer.parseInt(second.asString()))));
     }
 
     @Override
-    public Value visitDivision(Example2Parser.DivisionContext ctx) {
-        Value first = visit(ctx.expression(0));
-        Value second = visit(ctx.expression(1));
+    public Value visitDiv(Example2Parser.DivContext ctx) {
+        Value first = this.visit(ctx.expression(0));
+        Value second = this.visit(ctx.expression(1));
         return new Value((Integer.parseInt(first.asString()) / (Integer.parseInt(second.asString()))));
     }
 
     @Override
-    public Value visitPower(Example2Parser.PowerContext ctx) {
-        Value first = visit(ctx.expression(0));
-        Value second = visit(ctx.expression(1));
+    public Value visitPow(Example2Parser.PowContext ctx) {
+        Value first = this.visit(ctx.expression(0));
+        Value second = this.visit(ctx.expression(1));
         return new Value(Math.pow(Integer.parseInt(first.asString()) , Integer.parseInt(second.asString())));
     }
 
@@ -206,43 +192,62 @@ class MyVisitor extends Example2BaseVisitor<Value> {
     public Value visitConditionVariable(Example2Parser.ConditionVariableContext ctx) {
         Value value = this.visit(ctx.expression(0));
         boolean result = Boolean.parseBoolean(value.asString());
-        Value returnResult = null;
+        Value returnResult;
         if(result){
             returnResult = this.visit(ctx.expression(1));
-            printSystem("the result is true, print "+ returnResult);
+            System.err.println("the result is true, print "+ returnResult);
         }else {
             returnResult = this.visit(ctx.expression(2));
-            printSystem("the result is false, print "+ returnResult);
+            System.err.println("the result is false, print "+ returnResult);
         }
         return returnResult;
     }
 
-
     @Override
     public Value visitComparisons(Example2Parser.ComparisonsContext ctx) {
-        Value leftValue = visit(ctx.expression(0));
-        Value rightValue = visit(ctx.expression(1));
+        Value leftValue = this.visit(ctx.expression(0));
+        Value rightValue = this.visit(ctx.expression(1));
         int left = Integer.parseInt(leftValue.asString());
         int right = Integer.parseInt(rightValue.asString());
 
-        switch (ctx.getChild(1).getText()) {
-            case ">":
-                return new Value(left > right);
-            case "<":
-                return new Value(left < right);
-            case "<=":
-                return new Value(left <= right);
-            case ">=":
-                return new Value(left >= right);
-            case "==":
-                return new Value(left == right);
-            case "!=":
-                return new Value(left != right);
-            default:
-                return new Value(new Object());
-        }
+        return switch (ctx.getChild(1).getText()) {
+            case ">" -> new Value(left > right);
+            case "<" -> new Value(left < right);
+            case "<=" -> new Value(left <= right);
+            case ">=" -> new Value(left >= right);
+            case "==" -> new Value(left == right);
+            case "!=" -> new Value(left != right);
+            default -> new Value(new Object());
+        };
+    }
+
+    @Override
+    public Value visitAndExpr(Example2Parser.AndExprContext ctx) {
+        Boolean firstCondition = Boolean.parseBoolean(this.visit(ctx.expression(0)).asString());
+        Boolean secondCondition = Boolean.parseBoolean(this.visit(ctx.expression(1)).asString());
+        Value value = new Value(firstCondition && secondCondition);
+        System.err.println("The result is of {and} Expr " + " = " + (value));
+        return value;
+    }
+
+    @Override
+    public Value visitOrExpr(Example2Parser.OrExprContext ctx) {
+        Boolean firstCondition = Boolean.parseBoolean(this.visit(ctx.expression(0)).asString());
+        Boolean secondCondition = Boolean.parseBoolean(this.visit(ctx.expression(1)).asString());
+        Value value = new Value(firstCondition || secondCondition);
+        System.err.println("The result is of {or} Expr " + " = " + (value));
+        return value;
+    }
+
+    @Override
+    public Value visitNotExpr(Example2Parser.NotExprContext ctx) {
+        Boolean expr = this.visit(ctx.expression()).asBoolean();
+        Value value = new Value(!expr);
+        System.err.println("The result is of {not} Expr " + " = " + (value));
+        return value;
     }
 }
+
 
 public class Main {
 
