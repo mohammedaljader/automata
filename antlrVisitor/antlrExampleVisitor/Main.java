@@ -1,7 +1,7 @@
-import gen.Example2BaseVisitor;
-import gen.Example2Lexer;
-import gen.Example2Parser;
-import gen.Example2Visitor;
+//import gen.Example2BaseVisitor;
+//import gen.Example2Lexer;
+//import gen.Example2Parser;
+//import gen.Example2Visitor;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.*;
@@ -68,6 +68,21 @@ class MyVisitor extends Example2BaseVisitor<Value> {
     @Override
     public Value visitTerminal(TerminalNode node) {
         return (new Value(node.getText()));
+    }
+
+    @Override
+    public Value visitPrint_statement(Example2Parser.Print_statementContext ctx) {
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < ctx.expression().size(); i++) {
+            Value value = this.visit(ctx.expression(i));
+            if(i == 0){
+                output.append(value.asString());
+            }else {
+                output.append(", ").append(value.asString());
+            }
+        }
+        System.err.println(output);
+        return Value.VOID;
     }
 
     @Override
@@ -244,6 +259,61 @@ class MyVisitor extends Example2BaseVisitor<Value> {
         Boolean expr = this.visit(ctx.expression()).asBoolean();
         Value value = new Value(!expr);
         System.err.println("The result is of {not} Expr " + " = " + (value));
+        return value;
+    }
+
+    @Override
+    public Value visitIncrementExpr(Example2Parser.IncrementExprContext ctx) {
+        String id = ctx.ID().getText();
+        Value value = valuesHashMap.get(id);
+        Value result = new Value(Integer.parseInt(value.asString()) + 1);
+        valuesHashMap.put(id, result);
+        return result;
+    }
+
+    @Override
+    public Value visitDecrementExpr(Example2Parser.DecrementExprContext ctx) {
+        String id = ctx.ID().getText();
+        Value value = valuesHashMap.get(id);
+        Value result = new Value(Integer.parseInt(value.asString()) - 1);
+        valuesHashMap.put(id, result);
+        return result;
+    }
+
+    @Override
+    public Value visitEqualIncrementExpr(Example2Parser.EqualIncrementExprContext ctx) {
+        Value value1 = this.visit(ctx.expression(0));
+        Value value2 = this.visit(ctx.expression(1));
+        Value result = new Value(Integer.parseInt(value1.asString()) + Integer.parseInt( value2.asString()));
+        if(valuesHashMap.containsKey(ctx.expression(0).getText())){
+            valuesHashMap.put(ctx.expression(0).getText(),result);
+        }
+        return result;
+    }
+
+    @Override
+    public Value visitEqualDecrementExpr(Example2Parser.EqualDecrementExprContext ctx) {
+        Value value1 = this.visit(ctx.expression(0));
+        Value value2 = this.visit(ctx.expression(1));
+        Value result = new Value(Integer.parseInt(value1.asString()) - Integer.parseInt( value2.asString()));
+        if(valuesHashMap.containsKey(ctx.expression(0).getText())){
+            valuesHashMap.put(ctx.expression(0).getText(),result);
+        }
+        return result;
+    }
+
+    @Override
+    public Value visitFor_statement(Example2Parser.For_statementContext ctx) {
+        Value intValue = this.visit(ctx.for_block().assign_variables());
+        Value value = this.visit(ctx.for_block().expression(0));
+
+        while (Boolean.TRUE.equals(value.asBoolean())) {
+            this.visit(ctx.code_block());
+
+            intValue =  this.visit(ctx.for_block().expression(1));
+
+            value = this.visit(ctx.for_block().expression(0));
+        }
         return value;
     }
 }

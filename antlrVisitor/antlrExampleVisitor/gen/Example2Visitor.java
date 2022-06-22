@@ -29,6 +29,24 @@ public interface Example2Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrint_statement(Example2Parser.Print_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link Example2Parser#for_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFor_statement(Example2Parser.For_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Example2Parser#for_block}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFor_block(Example2Parser.For_blockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Example2Parser#code_block}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCode_block(Example2Parser.Code_blockContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code Add}
 	 * labeled alternative in {@link Example2Parser#expression}.
 	 * @param ctx the parse tree
@@ -43,12 +61,26 @@ public interface Example2Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAndExpr(Example2Parser.AndExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code IncrementExpr}
+	 * labeled alternative in {@link Example2Parser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIncrementExpr(Example2Parser.IncrementExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code Sub}
 	 * labeled alternative in {@link Example2Parser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitSub(Example2Parser.SubContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code EqualIncrementExpr}
+	 * labeled alternative in {@link Example2Parser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEqualIncrementExpr(Example2Parser.EqualIncrementExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code VariableValue}
 	 * labeled alternative in {@link Example2Parser#expression}.
@@ -106,6 +138,13 @@ public interface Example2Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBooleanValue(Example2Parser.BooleanValueContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code EqualDecrementExpr}
+	 * labeled alternative in {@link Example2Parser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEqualDecrementExpr(Example2Parser.EqualDecrementExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code Pow}
 	 * labeled alternative in {@link Example2Parser#expression}.
 	 * @param ctx the parse tree
@@ -133,6 +172,13 @@ public interface Example2Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitParentheses(Example2Parser.ParenthesesContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DecrementExpr}
+	 * labeled alternative in {@link Example2Parser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDecrementExpr(Example2Parser.DecrementExprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link Example2Parser#assign_variables}.
 	 * @param ctx the parse tree

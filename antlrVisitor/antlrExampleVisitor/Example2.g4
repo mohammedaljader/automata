@@ -6,13 +6,22 @@ start2      : statement* EOF;
 
 statement    : expression
              | assign_variables
+             | for_statement
              | print_statement
              | records
              | integer
              | char
              ;
 
-print_statement:  PRINT expression* (COMMA expression)*;
+print_statement:  PRINT expression (COMMA expression)*;
+
+for_statement: FOR for_block code_block;
+
+for_block: OPAR assign_variables SEMICOLON expression SEMICOLON expression CPAR;
+
+code_block: OPEN_CURLY_BRACKET statement*  CLOSE_CURLY_BRACKET
+          | statement
+          ;
 
 expression     : expression ADD expression      #Add
                | expression SUB expression      #Sub
@@ -22,6 +31,10 @@ expression     : expression ADD expression      #Add
                | expression AND expression      #AndExpr
                | expression OR expression       #OrExpr
                | NOT expression                 #NotExpr
+               | ID INCREMENT #IncrementExpr
+               | ID DECREMENT #DecrementExpr
+               | expression EQUAL_INCREMENT expression #EqualIncrementExpr
+               | expression EQUAL_DECREMENT expression #EqualDecrementExpr
                | expression (GREATER_OR_EQUAL
                             |SMALLER_OR_EQUAL
                             |GREATHER_THAN
@@ -61,6 +74,7 @@ SEMICOLON: ';';
 COLON: ':';
 OPAR: '(';
 CPAR: ')';
+FOR: 'for';
 OPEN_CURLY_BRACKET : '{';
 CLOSE_CURLY_BRACKET : '}';
 OPEN_SQUARE_BRACKET : '[';
@@ -85,3 +99,7 @@ BOOL   : 'true' | 'false';
 ID     : [_A-Za-z][A-Za-z_!0-9.]* ;
 COMMENT : '//' .+? ('\n'|EOF) -> skip;
 WS     : [ \t\r\n]+ -> skip ;
+EQUAL_INCREMENT : '+=';
+EQUAL_DECREMENT : '-=';
+INCREMENT : '++';
+DECREMENT : '--';
