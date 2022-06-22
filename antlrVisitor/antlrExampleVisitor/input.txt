@@ -1,7 +1,2 @@
-x + 5 + y + z
-print a, 73+b, "abc"
-while c and d do e+f+g
-if x then y else z fi
-if x then print "zzz" fi
-192.168.64.23
-print "bla", x and y
+x = 4
+c = x < 5 ? "cold" : "hot"
