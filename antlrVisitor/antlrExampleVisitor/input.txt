@@ -1,14 +1,9 @@
-integer               w
-char                  x
-record [
-    integer       a;
-    char          b;
-]                     y
-record [
-    integer       c;
-    record [
-        char  p;
-        char  q;
-        char  r;
-    ]             d;
-]                     z
+a = 1
+b = 2
+
+a , b = b , a
+
+print "the value of a is :", a
+print "the value of b is :", b
+a += 10
+print "the value of a is :", a

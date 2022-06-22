@@ -97,17 +97,23 @@ class MyVisitor extends Example2BaseVisitor<Value> {
 
     @Override
     public Value visitAssign_variables(Example2Parser.Assign_variablesContext ctx) {
-////        Map<String, Value> valuesHashMap2 = new HashMap<>();
-//        HashMap<String, Value> valuesHashMap2 = (HashMap<String, Value>) valuesHashMap;
+        // a temporary hashmap to update the variables that already exist in the original hashmap
+        Map<String, Value> temp = new HashMap<>();
         if (ctx.ID().size() == ctx.expression().size()){
             for (int i = 0; i < ctx.ID().size(); i++) {
                 String id =  ctx.ID(i).getText();
                 Value rtnval = this.visit(ctx.expression(i));
+                // If the variable does not exist, then add it to the original hashmap
                 if (!valuesHashMap.containsKey(id)){
                     valuesHashMap.put(id,rtnval);
                 }
+
                 System.err.println(id+ " = " + rtnval.toString());
+                //Otherwise, add it to the temp hashmap
+                temp.put(id, rtnval);
             }
+            // update the original hashmap with the updated values
+            valuesHashMap.putAll(temp);
         }
         else {
             System.err.println("Error: the variables of left side do not match the right side");
