@@ -8,6 +8,10 @@ statement    : expression
              | assign_variables
              | for_statement
              | print_statement
+             | if_statement
+             | while_statement
+             | repeat_until_statement
+             | do_while_statement
              | records
              | integer
              | char
@@ -15,13 +19,22 @@ statement    : expression
 
 print_statement:  PRINT expression (COMMA expression)*;
 
+repeat_until_statement : REPEAT code_block UNTIL OPAR expression CPAR;
+
+do_while_statement : DO code_block WHILE OPAR expression CPAR;
+
+while_statement: WHILE OPAR expression CPAR code_block ;
+
 for_statement: FOR for_block code_block;
 
 for_block: OPAR assign_variables SEMICOLON expression SEMICOLON expression CPAR;
 
+if_statement: IF OPAR expression CPAR code_block (ELSE code_block)?;
+
 code_block: OPEN_CURLY_BRACKET statement*  CLOSE_CURLY_BRACKET
           | statement
           ;
+
 
 expression     : expression ADD expression      #Add
                | expression SUB expression      #Sub
@@ -55,12 +68,18 @@ integer: INTEGER ID;
 
 char: CHAR ID;
 
-recordsTypes:  integer SEMICOLON| char SEMICOLON| records SEMICOLON;
+records: RECORD OPEN_SQUARE_BRACKET recordsBlock* CLOSE_SQUARE_BRACKET ID;
 
-records: RECORD OPEN_SQUARE_BRACKET recordsTypes* CLOSE_SQUARE_BRACKET ID;
+recordsBlock:  (integer | char | records) SEMICOLON;
 
 
 // tokens
+DO: 'do';
+WHILE : 'while';
+REPEAT: 'repeat';
+UNTIL: 'until';
+IF : 'if';
+ELSE : 'else';
 IS_EQUAL: '=';
 MUL:    '*';
 DIV:    '/';
@@ -103,3 +122,4 @@ EQUAL_INCREMENT : '+=';
 EQUAL_DECREMENT : '-=';
 INCREMENT : '++';
 DECREMENT : '--';
+

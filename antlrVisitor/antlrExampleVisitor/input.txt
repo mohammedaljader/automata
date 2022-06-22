@@ -1,3 +1,14 @@
-for(a = 0; a < 3; a = a + 1){
-    print a
-}
+integer               w
+char                  x
+record [
+    integer       a;
+    char          b;
+]                     y
+record [
+    integer       c;
+    record [
+        char  p;
+        char  q;
+        char  r;
+    ]             d;
+]                     z

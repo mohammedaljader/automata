@@ -1,7 +1,7 @@
-//import gen.Example2BaseVisitor;
-//import gen.Example2Lexer;
-//import gen.Example2Parser;
-//import gen.Example2Visitor;
+import gen.Example2BaseVisitor;
+import gen.Example2Lexer;
+import gen.Example2Parser;
+import gen.Example2Visitor;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.*;
@@ -63,7 +63,7 @@ class Value {
 
 class MyVisitor extends Example2BaseVisitor<Value> {
     private final Map<String, Value> valuesHashMap = new HashMap<>();
-    private final Map<String, Value> recordsHashMap = new HashMap<>();
+//    private final Map<String, Value> recordsHashMap = new HashMap<>();
 
     @Override
     public Value visitTerminal(TerminalNode node) {
@@ -122,39 +122,66 @@ class MyVisitor extends Example2BaseVisitor<Value> {
         return value;
     }
 
+    private int sumRecordSize(List<Value> temp){
+        int sum = 0;
+        for (Value value : temp) {
+            sum += Integer.parseInt(value.asString());
+        }
+        return sum;
+    }
+
     @Override
     public Value visitRecords(Example2Parser.RecordsContext ctx) {
         List<Value> temp = new ArrayList<>();
         String id = ctx.ID().getText();
-        for (int i = 0; i < ctx.recordsTypes().size() ; i++) {
+        for (int i = 0; i < ctx.recordsBlock().size() ; i++) {
 
-            if(ctx.recordsTypes(i).integer() != null)
+            if(ctx.recordsBlock(i).integer() != null)
             {
-                Value value = this.visit(ctx.recordsTypes(i).integer());
+                Value value = this.visit(ctx.recordsBlock(i).integer());
                 temp.add(value);
             }
-            else if (ctx.recordsTypes(i).char_() != null)
+            else if (ctx.recordsBlock(i).char_() != null)
             {
-                Value value = this.visit(ctx.recordsTypes(i).char_());
+                Value value = this.visit(ctx.recordsBlock(i).char_());
                 temp.add(value);
-            } else if (ctx.recordsTypes(i).records() != null) {
-                Value value = this.visit(ctx.recordsTypes(i).records());
+            } else if (ctx.recordsBlock(i).records() != null) {
+                Value value = this.visit(ctx.recordsBlock(i).records());
                 temp.add(value);
             }
         }
-        recordsHashMap.put(id,new Value(calculate(temp)));
-
-        System.out.println("The size of " + id + " is " + recordsHashMap.get(id));
-        return new Value(recordsHashMap.get(id));
+        System.out.println("The size of " + id + " is " + sumRecordSize(temp));
+//        recordsHashMap.put(id, new Value(sumRecordSize(temp)));
+        return new Value(sumRecordSize(temp));
     }
 
-    private int calculate(List<Value> temp){
-        int sum = 0;
-        for (Value value : temp) {
-            sum += Integer.parseInt(String.valueOf(value));
-        }
-        return sum;
-    }
+//    @Override
+//    public Value visitRecords(Example2Parser.RecordsContext ctx) {
+//        List<Value> temp = new ArrayList<>();
+//        String id = ctx.ID().getText();
+//        for (int i = 0; i < ctx.recordsTypes().size() ; i++) {
+//
+//            if(ctx.recordsTypes(i).integer() != null)
+//            {
+//                Value value = this.visit(ctx.recordsTypes(i).integer());
+//                temp.add(value);
+//            }
+//            else if (ctx.recordsTypes(i).char_() != null)
+//            {
+//                Value value = this.visit(ctx.recordsTypes(i).char_());
+//                temp.add(value);
+//            } else if (ctx.recordsTypes(i).records() != null) {
+//                Value value = this.visit(ctx.recordsTypes(i).records());
+//                temp.add(value);
+//            }
+//        }
+//        recordsHashMap.put(id,new Value(calculate(temp)));
+//
+//        System.out.println("The size of " + id + " is " + recordsHashMap.get(id));
+//        return new Value(recordsHashMap.get(id));
+//    }
+
+
 
     @Override
     public Value visitInteger(Example2Parser.IntegerContext ctx) {
@@ -315,6 +342,53 @@ class MyVisitor extends Example2BaseVisitor<Value> {
             value = this.visit(ctx.for_block().expression(0));
         }
         return value;
+    }
+
+    @Override
+    public Value visitRepeat_until_statement(Example2Parser.Repeat_until_statementContext ctx) {
+        Value value = this.visit(ctx.expression());
+
+        while (Boolean.TRUE.equals(value.asBoolean())) {
+            this.visit(ctx.code_block());
+
+             value = this.visit(ctx.expression());
+        }
+        return value;
+    }
+
+    @Override
+    public Value visitDo_while_statement(Example2Parser.Do_while_statementContext ctx) {
+        Value value = this.visit(ctx.expression());
+
+        while (Boolean.TRUE.equals(value.asBoolean())) {
+            this.visit(ctx.code_block());
+
+            value = this.visit(ctx.expression());
+        }
+        return value;
+    }
+
+    @Override
+    public Value visitWhile_statement(Example2Parser.While_statementContext ctx) {
+        Value value = this.visit(ctx.expression());
+
+        while (Boolean.TRUE.equals(value.asBoolean())) {
+            this.visit(ctx.code_block());
+
+            value = this.visit(ctx.expression());
+        }
+        return value;
+    }
+
+    @Override
+    public Value visitIf_statement(Example2Parser.If_statementContext ctx) {
+        Value value = this.visit(ctx.expression());
+        if(Boolean.TRUE.equals(value.asBoolean())){
+            this.visit(ctx.code_block(0));
+        }else if(ctx.ELSE() != null){
+            this.visit(ctx.code_block(1));
+        }
+        return Value.VOID;
     }
 }
 

@@ -29,6 +29,24 @@ public interface Example2Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrint_statement(Example2Parser.Print_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link Example2Parser#repeat_until_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRepeat_until_statement(Example2Parser.Repeat_until_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Example2Parser#do_while_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDo_while_statement(Example2Parser.Do_while_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Example2Parser#while_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhile_statement(Example2Parser.While_statementContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link Example2Parser#for_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -40,6 +58,12 @@ public interface Example2Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFor_block(Example2Parser.For_blockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Example2Parser#if_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIf_statement(Example2Parser.If_statementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link Example2Parser#code_block}.
 	 * @param ctx the parse tree
@@ -198,15 +222,15 @@ public interface Example2Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitChar(Example2Parser.CharContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link Example2Parser#recordsTypes}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitRecordsTypes(Example2Parser.RecordsTypesContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link Example2Parser#records}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitRecords(Example2Parser.RecordsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Example2Parser#recordsBlock}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRecordsBlock(Example2Parser.RecordsBlockContext ctx);
 }
