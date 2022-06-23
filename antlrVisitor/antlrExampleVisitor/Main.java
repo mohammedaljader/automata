@@ -78,7 +78,7 @@ class MyVisitor extends Example2BaseVisitor<Value> {
             if(i == 0){
                 output.append(value.asString());
             }else {
-                output.append(", ").append(value.asString());
+                output.append(" ").append(value.asString());
             }
         }
         System.err.println(output);
@@ -128,6 +128,7 @@ class MyVisitor extends Example2BaseVisitor<Value> {
         return value;
     }
 
+    // a function to calculate the size of the record
     private int sumRecordSize(List<Value> temp){
         int sum = 0;
         for (Value value : temp) {
@@ -138,17 +139,16 @@ class MyVisitor extends Example2BaseVisitor<Value> {
 
     @Override
     public Value visitRecords(Example2Parser.RecordsContext ctx) {
+        // a temporary list to add the values of the elements inside the record
         List<Value> temp = new ArrayList<>();
         String id = ctx.ID().getText();
         for (int i = 0; i < ctx.recordsBlock().size() ; i++) {
 
-            if(ctx.recordsBlock(i).integer() != null)
-            {
+            if(ctx.recordsBlock(i).integer() != null) {
                 Value value = this.visit(ctx.recordsBlock(i).integer());
                 temp.add(value);
             }
-            else if (ctx.recordsBlock(i).char_() != null)
-            {
+            else if (ctx.recordsBlock(i).char_() != null) {
                 Value value = this.visit(ctx.recordsBlock(i).char_());
                 temp.add(value);
             } else if (ctx.recordsBlock(i).records() != null) {
@@ -156,8 +156,10 @@ class MyVisitor extends Example2BaseVisitor<Value> {
                 temp.add(value);
             }
         }
-        System.out.println("The size of " + id + " is " + sumRecordSize(temp));
+        // print the size of the record
+        System.out.println("The size of " + id + " is " + sumRecordSize(temp) + " bytes");
 //        recordsHashMap.put(id, new Value(sumRecordSize(temp)));
+        //returns the size of the record
         return new Value(sumRecordSize(temp));
     }
 
@@ -191,14 +193,18 @@ class MyVisitor extends Example2BaseVisitor<Value> {
 
     @Override
     public Value visitInteger(Example2Parser.IntegerContext ctx) {
-        System.err.println("The size of " + ctx.ID().getText() + " is " + 8);
-        return new Value(8);
+        System.err.println("The size of " + ctx.ID().getText() + " is " + 8 + " bytes");
+        //the value of integer is 8 bytes
+        Value value = new Value(9);
+        return value;
     }
 
     @Override
     public Value visitChar(Example2Parser.CharContext ctx) {
-        System.err.println("The size of " + ctx.ID().getText() + " is " + 1);
-        return new Value(1);
+        System.err.println("The size of " + ctx.ID().getText() + " is " + 1 + " bytes");
+        //the value of char is 1 bytes
+        Value value = new Value(1);
+        return value;
     }
 
     @Override
@@ -274,7 +280,6 @@ class MyVisitor extends Example2BaseVisitor<Value> {
         Boolean firstCondition = Boolean.parseBoolean(this.visit(ctx.expression(0)).asString());
         Boolean secondCondition = Boolean.parseBoolean(this.visit(ctx.expression(1)).asString());
         Value value = new Value(firstCondition && secondCondition);
-        System.err.println("The result is of {and} Expr " + " = " + (value));
         return value;
     }
 
@@ -283,7 +288,6 @@ class MyVisitor extends Example2BaseVisitor<Value> {
         Boolean firstCondition = Boolean.parseBoolean(this.visit(ctx.expression(0)).asString());
         Boolean secondCondition = Boolean.parseBoolean(this.visit(ctx.expression(1)).asString());
         Value value = new Value(firstCondition || secondCondition);
-        System.err.println("The result is of {or} Expr " + " = " + (value));
         return value;
     }
 
@@ -291,7 +295,6 @@ class MyVisitor extends Example2BaseVisitor<Value> {
     public Value visitNotExpr(Example2Parser.NotExprContext ctx) {
         Boolean expr = this.visit(ctx.expression()).asBoolean();
         Value value = new Value(!expr);
-        System.err.println("The result is of {not} Expr " + " = " + (value));
         return value;
     }
 

@@ -1,9 +1,4 @@
-a = 1
-b = 2
+temperature = 26
+x = (temperature < 25) and (temperature > 25) ? "cold" : "hot"
 
-a , b = b , a
-
-print "the value of a is :", a
-print "the value of b is :", b
-a += 10
-print "the value of a is :", a
+print "the result of x is :", x
